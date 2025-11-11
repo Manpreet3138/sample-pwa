@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple PWA Example</title>
+
+  <!-- Manifest -->
+  <link rel="manifest" href="./manifest.json" />
+
+  <!-- iOS install support -->
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#2c3e50" />
+
+  <style>
+    body { font-family: Arial, sans-serif; padding: 1rem; text-align: center; }
+    h1 { color: #2c3e50; }
+    .install { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Welcome to My PWA</h1>
+  <p>This is a simple Progressive Web App example.</p>
+  <button id="btnInstall" class="install" hidden>Install app</button>
+
+  <script>
+    // Register the service worker for offline caching
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => console.log('Service Worker registered', reg.scope))
+          .catch(err => console.log('Service Worker registration failed:', err));
+      });
+    }
+
+    // Optional: show an install button if available
+    let deferredPrompt;
+    const btn = document.getElementById('btnInstall');
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      btn.hidden = false;
+    });
+    btn.addEventListener('click', async () => {
+      btn.hidden = true;
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+      }
+    });
+  </script>
+</body>
+</html>
